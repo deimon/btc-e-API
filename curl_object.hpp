@@ -1,6 +1,8 @@
 #ifndef CURL_OBJECT_HPP
 #define CURL_OBJECT_HPP
 
+#define CURL_STATICLIB
+
 #include <curl/curl.h>
 #include "uncopyable.hpp"
 

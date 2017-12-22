@@ -36,7 +36,7 @@ std::string params(const std::string& str) {
 class btc_api: public uncopyable {
 public:
     btc_api(const std::string& key, const std::string& secret)
-        : nonce_(0), key_(key), secret_(secret), connection_("https://btc-e.com/tapi")
+        : nonce_(0), key_(key), secret_(secret), connection_("https://wex.nz/tapi")
     {}
     
     json_data call(const std::string& method, const std::string& p) {

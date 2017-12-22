@@ -40,7 +40,7 @@ public:
 class connection: public uncopyable {
 public:
     connection(const std::string url = "")
-        : auth_page_{url}
+        : auth_page_(url)
     {}
     ~connection() {}
     
@@ -54,6 +54,7 @@ public:
         
         curl_easy_setopt( curl_object::get_instance(), CURLOPT_POSTFIELDS,    params.c_str() );
         curl_easy_setopt( curl_object::get_instance(), CURLOPT_POSTFIELDSIZE, params.size() );
+        curl_easy_setopt(curl_object::get_instance(), CURLOPT_SSL_VERIFYPEER, FALSE);
         
         curl_slist* list = r.prepare(headers);
         curl_easy_setopt(curl_object::get_instance(), CURLOPT_HTTPHEADER, list);
