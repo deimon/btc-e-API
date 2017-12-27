@@ -18,7 +18,6 @@
 #include "pairs.hpp"
 #include <ctime>
 #include <cassert>
-#include <unistd.h>
 
 template <typename... Args>
 std::string params(const std::string& str, Args... args) {
@@ -33,15 +32,30 @@ std::string params(const std::string& str) {
     return str;
 }
 
+std::string apiFormat(double rate, unsigned int decimal_places)
+{
+  std::string res = std::to_string(rate);
+
+  size_t pos = res.find(".") + decimal_places + 1;
+  res.erase(pos, res.size() - pos);
+
+  return res;
+}
+
 class btc_api: public uncopyable {
 public:
-    btc_api(const std::string& key, const std::string& secret)
-        : nonce_(0), key_(key), secret_(secret), connection_("https://wex.nz/tapi")
+    btc_api(const std::string& key, const std::string& secret, const unsigned long& nonce = ::time(nullptr))
+        : nonce_(nonce), key_(key), secret_(secret), connection_("https://wex.nz/tapi")
     {}
+
+    unsigned long GetNonce()
+    {
+      return nonce_;
+    }
     
     json_data call(const std::string& method, const std::string& p) {
         std::string params = "nonce=";
-        nonce_ = ::time(nullptr);
+        nonce_++;
         params.append(std::to_string(nonce_));
         params.append("&method=" + method);
         if (p.size() != 0) {
@@ -86,7 +100,7 @@ public:
         return this->call("TransHistory", params);
     }
     
-    json_data trade(const btc_e::pair& pair, btc_e::type type, unsigned int rate, double amount) {
+    json_data trade(const btc_e::pair& pair, btc_e::type type, double rate, double amount) {
         assert(rate >= 0);
         assert(amount >= 0);
         
@@ -95,7 +109,7 @@ public:
         params += "&type=";
         params += (type == btc_e::type::buy ? "buy" : "sell");
         params += "&rate=";
-        params += std::to_string(rate);
+        params += apiFormat(rate, pair.GetDecimalPlaces());
         params += "&amount=";
         params += std::to_string(amount);
         
@@ -163,8 +177,8 @@ public:
     /**
      * @example : std::string response = btc_api_object.depth(btc_e::btc_usd());
      **/
-    json_data depth(const btc_e::pair& p) {
-        http::connection c(p.depth());
+    json_data depth(const btc_e::pair& p, const unsigned int limit = 150) {
+      http::connection c(p.depth() + "?limit=" + std::to_string(limit));
         c.request(http::post());
         return c.get_response();
     }

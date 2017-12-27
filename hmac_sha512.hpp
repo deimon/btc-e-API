@@ -12,7 +12,7 @@ public:
         HMAC_CTX_init(&ctx);
 
         // Set HMAC key.
-        HMAC_Init_ex(&ctx, reinterpret_cast<const unsigned char*>(key.c_str()), key.size(), EVP_sha512(), NULL);
+        HMAC_Init_ex(&ctx, reinterpret_cast<const unsigned char*>(key.c_str()), static_cast<int>(key.size()), EVP_sha512(), NULL);
 
         // May be called repeatedly to insert all your data.
         HMAC_Update(&ctx, reinterpret_cast<const unsigned char*>(msg.c_str()), msg.size());
@@ -21,7 +21,7 @@ public:
         unsigned char* result = new unsigned char[129];
         unsigned int result_len = 129;
         HMAC_Final(&ctx, result, &result_len);
-        for (int i = 0; i < result_len; i++) {
+        for (unsigned int i = 0; i < result_len; i++) {
             digest_.push_back(int(result[i]));
         }
         HMAC_CTX_cleanup(&ctx);
